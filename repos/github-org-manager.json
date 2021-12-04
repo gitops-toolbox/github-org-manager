@@ -1,0 +1,12 @@
+{
+  "name": "github-org-manager",
+  "description": "Manage your github organization using the gitiops approach",
+  "private": false,
+  "visibility": "public",
+  "has_issues": true,
+  "has_projects": true,
+  "has_wiki": true,
+  "is_template": false,
+  "archived": false,
+  "disabled": false
+}
