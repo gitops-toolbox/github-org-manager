@@ -16,51 +16,49 @@ limitations under the License.
 package cmd
 
 import (
-	"encoding/json"
 	"fmt"
 	githuborg "gitops-toolbox/github-org-manager/lib"
 	"log"
-	"path/filepath"
 
 	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
 )
 
-// localCmd represents the local command
-var localCmd = &cobra.Command{
-	Use:   "local <organization>",
-	Short: "Print all local repos configuration",
+// syncCmd represents the sync command
+var syncCmd = &cobra.Command{
+	Use:   "sync <organization>",
+	Short: "A brief description of your command",
 	Long:  ``,
 	Args:  cobra.MinimumNArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
 		organization := args[0]
-		repos, err := githuborg.LoadConfig(filepath.Join("repos", organization))
+		token := viper.GetString("github-token")
+		org := githuborg.GetClient(token, organization)
+		outOfSyncRepos, err := org.GetOutOfSyncRepos()
 
 		if err != nil {
 			log.Fatal(err)
 		}
 
-		for _, repo := range repos {
-			jr, err := json.Marshal(repo)
-
+		for _, repo := range outOfSyncRepos {
+			err := repo.Reconcile(org)
 			if err != nil {
-				log.Fatal(err)
+				fmt.Println(err)
 			}
-
-			fmt.Printf("%s\n", jr)
 		}
 	},
 }
 
 func init() {
-	rootCmd.AddCommand(localCmd)
+	rootCmd.AddCommand(syncCmd)
 
 	// Here you will define your flags and configuration settings.
 
 	// Cobra supports Persistent Flags which will work for this command
 	// and all subcommands, e.g.:
-	// localCmd.PersistentFlags().String("foo", "", "A help for foo")
+	// syncCmd.PersistentFlags().String("foo", "", "A help for foo")
 
 	// Cobra supports local flags which will only run when this command
 	// is called directly, e.g.:
-	// localCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
+	// syncCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 }

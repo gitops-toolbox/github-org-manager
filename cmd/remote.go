@@ -1,5 +1,5 @@
 /*
-Copyright © 2021 NAME HERE <EMAIL ADDRESS>
+Copyright © 2021 Luca Lanziani <luca@lanziani.com>
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -22,11 +22,12 @@ import (
 	"log"
 
 	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
 )
 
 // remoteCmd represents the remote command
 var remoteCmd = &cobra.Command{
-	Use:   "remote",
+	Use:   "remote <organization>",
 	Short: "A brief description of your command",
 	Long: `A longer description that spans multiple lines and likely contains examples
 and usage of using your command. For example:
@@ -34,21 +35,25 @@ and usage of using your command. For example:
 Cobra is a CLI library for Go that empowers applications.
 This application is a tool to generate the needed files
 to quickly create a Cobra application.`,
+	Args: cobra.MinimumNArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
-		repos, err := githuborg.GetRepos("gitops-toolbox")
+		organization := args[0]
+		token := viper.GetString("github-token")
+		org := githuborg.GetClient(token, organization)
+		repos, err := org.GetRepos()
 
 		if err != nil {
 			fmt.Println(err)
 		}
 
 		for _, repo := range repos {
-			jr, err := json.Marshal(githuborg.RepositoryToRepo(repo))
+			jr, err := json.Marshal(repo)
 
 			if err != nil {
 				log.Fatal(err)
 			}
 
-			fmt.Printf("%v\n", string(jr))
+			fmt.Printf("%s\n", jr)
 		}
 	},
 }

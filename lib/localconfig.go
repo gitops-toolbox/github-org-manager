@@ -5,22 +5,38 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+
+	"log"
 )
+
+type JsonRepo struct {
+	Name string
+	Repo
+}
 
 func loadRepo(filename string) (Repo, error) {
 	content, err := os.ReadFile(filename)
 	repo := Repo{}
+	JsonRepo := map[string]Repo{}
 
 	if err != nil {
 		fmt.Println(err)
 		return repo, err
 	}
 
-	err = json.Unmarshal(content, &repo)
+	err = json.Unmarshal(content, &JsonRepo)
 
 	if err != nil {
 		fmt.Println(err)
 		return repo, err
+	}
+
+	for _, v := range JsonRepo {
+		repo = v
+	}
+
+	if len(repo.Topics) == 0 {
+		repo.Topics = []string{}
 	}
 
 	return repo, nil
@@ -31,14 +47,14 @@ func LoadConfig(path string) (map[string]Repo, error) {
 	f, err := os.Open(path)
 
 	if err != nil {
-		fmt.Println(err)
+		log.Println(err)
 		return repos, err
 	}
 
 	files, err := f.ReadDir(0)
 
 	if err != nil {
-		fmt.Println(err)
+		log.Println(err)
 		return repos, err
 	}
 
@@ -46,7 +62,7 @@ func LoadConfig(path string) (map[string]Repo, error) {
 		if !v.IsDir() {
 			repo, err := loadRepo(filepath.Join(path, v.Name()))
 			if err != nil {
-				fmt.Println(err)
+				log.Println(err)
 				continue
 			}
 			repos[*repo.Name] = repo

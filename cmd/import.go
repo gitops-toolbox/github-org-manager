@@ -1,5 +1,5 @@
 /*
-Copyright © 2021 NAME HERE <EMAIL ADDRESS>
+Copyright © 2021 Luca Lanziani <luca@lanziani.com>
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -19,53 +19,40 @@ import (
 	"encoding/json"
 	"fmt"
 	githuborg "gitops-toolbox/github-org-manager/lib"
-	"io/ioutil"
 	"log"
-	"path/filepath"
 
 	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
 )
 
 // importCmd represents the import command
 var importCmd = &cobra.Command{
-	Use:   "import [reponame]",
-	Short: "A brief description of your command",
-	Long: `A longer description that spans multiple lines and likely contains examples
-and usage of using your command. For example:
-
-Cobra is a CLI library for Go that empowers applications.
-This application is a tool to generate the needed files
-to quickly create a Cobra application.`,
-	Args: cobra.MinimumNArgs(1),
+	Use:   "import <organization> <reponame>",
+	Short: "print json representation of the repo to stdout",
+	Long:  ``,
+	Args:  cobra.MinimumNArgs(2),
 	Run: func(cmd *cobra.Command, args []string) {
-		reponame := args[0]
-		repos, err := githuborg.LoadConfig("repos")
+		organization, reponame := args[0], args[1]
+		token := viper.GetString("github-token")
+		org := githuborg.GetClient(token, organization)
 
-		if err != nil {
-			log.Fatal(err)
-		}
-		_, ok := repos[reponame]
+		log.Println("Importing", reponame)
 
-		if ok {
-			log.Fatal("Repo already imported")
-		}
-
-		fmt.Println("Importing", reponame)
-
-		repository, err := githuborg.GetRepo("gitops-toolbox", reponame)
+		repo, err := org.GetRepo(reponame)
 
 		if err != nil {
 			log.Fatal(err)
 		}
 
-		repo := githuborg.RepositoryToRepo(repository)
-		repoAsString, err := json.MarshalIndent(repo, "", "  ")
+		repoAsString, err := json.MarshalIndent(map[string]githuborg.Repo{
+			*repo.Name: *repo,
+		}, "", "  ")
 
 		if err != nil {
 			log.Fatal(err)
 		}
 
-		ioutil.WriteFile(filepath.Join("repos", *repo.Name+".json"), repoAsString, 0664)
+		fmt.Printf("%s", repoAsString)
 	},
 }
 
