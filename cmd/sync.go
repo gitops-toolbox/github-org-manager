@@ -17,8 +17,9 @@ package cmd
 
 import (
 	"fmt"
-	githuborg "gitops-toolbox/github-org-manager/lib"
 	"log"
+
+	githuborg "github.com/gitops-toolbox/github-org-manager/lib"
 
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
