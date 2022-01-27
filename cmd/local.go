@@ -18,9 +18,10 @@ package cmd
 import (
 	"encoding/json"
 	"fmt"
-	githuborg "gitops-toolbox/github-org-manager/lib"
 	"log"
 	"path/filepath"
+
+	githuborg "github.com/gitops-toolbox/github-org-manager/lib"
 
 	"github.com/spf13/cobra"
 )

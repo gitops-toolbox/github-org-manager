@@ -15,7 +15,7 @@ limitations under the License.
 */
 package main
 
-import "gitops-toolbox/github-org-manager/cmd"
+import "github.com/gitops-toolbox/github-org-manager/cmd"
 
 func main() {
 	cmd.Execute()
